@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Ticket</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/carrito.css">
+    <link rel="stylesheet" href="/css/secciones.css">
+    <link rel="stylesheet" href="/css/modal.css">
+</head>
+<body>
+    <section class="principal">
+        <header class="header">
+            <a href="/" class="logo">
+                <img src="/img/logo.png" alt="EasyTicket">
+            </a>
+            <nav class="nav">
+                <a href="#">Conciertos</a>
+                <a href="#">Deportes</a>
+                <a href="#">Teatro</a>
+                <a href="#">Culturales</a>
+                <a href="#">Comedia</a>
+                <a href="#">Festivales</a>
+            </nav>
+            <% if (user) { %>
+                <!-- Botón de perfil (visible cuando el usuario está autenticado) -->
+                <div class="profile-dropdown">
+                    <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="/img/user.png" alt="Perfil">
+                        <span id="profileEmail"><%= user.email %></span> <!-- Mostrar el correo aquí -->
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/historial">Historial</a> <!-- Cambiado de "Perfil" a "Historial" -->
+                        <a href="/billetera">Billetera</a>
+                        <a href="/atencion/tickets/vista">Mis Tickets</a>
+                        <a href="/logout">Cerrar sesión</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Botón de iniciar sesión (visible cuando el usuario no está autenticado) -->
+                <button id="loginButton" onclick="openModal()">Iniciar sesión</button>
+            <% } %>
+        </header>
+        <main>
+            <h1>Carrito de Compras</h1>
+
+            <% if (successMessage) { %>
+                <div class="success-message"><%= successMessage %></div>
+            <% } %>
+            <% if (errorMessage) { %>
+                <div class="error-message"><%= errorMessage %></div>
+            <% } %>
+
+            <% if (carrito.length > 0) { %>
+                <div class="cart-content">
+                    <div class="cart-container">
+                        <% carrito.forEach((item, index) => { %>
+                            <div class="cart-item">
+                                <div class="cart-item-image">
+                                    <img src="/img/camilo.png" alt="<%= item.nombre %>">
+                                </div>
+                                <div class="cart-item-info">
+                                    <h2><%= item.nombre %></h2>
+                                    <p><%= item.ubicacion %></p>
+                                    <p>Tipo de ticket: <%= item.zona %></p>
+                                    <p>Cantidad: <%= item.cantidad %></p>
+                                    <p>Precio unitario: ₡<%= item.precio %></p>
+                                    <p>Total: ₡<%= item.cantidad * item.precio %></p>
+                                    <form action="/carrito/modificar" method="POST" class="form-inline">
+                                        <input type="hidden" name="index" value="<%= index %>">
+                                        <label for="cantidad-<%= index %>">Cambiar Cantidad:</label>
+                                        <input id="cantidad-<%= index %>" type="number" name="cantidad" value="<%= item.cantidad %>" min="1">
+                                        <button type="submit">Actualizar</button>
+                                    </form>
+                                    <form action="/carrito/eliminar" method="POST" class="form-inline">
+                                        <input type="hidden" name="index" value="<%= index %>">
+                                        <button type="submit" class="delete-btn">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <div class="cart-summary">
+                        <h2>Resumen de carrito</h2>
+                        <p>Subtotal: ₡<%= subtotal %></p>
+                        <p>Impuestos (13%): ₡<%= impuestos %></p>
+                        <p>Tarifa de servicio: ₡5.000</p>
+                        <p>Total: ₡<%= total %></p>
+                        <div class="promo-code">
+                            <input type="text" placeholder="Ingresa código promocional">
+                            <button>Aplicar</button>
+                        </div>
+                        <form action="/comprar" method="POST">
+                            <label for="tarjeta">Selecciona una tarjeta:</label>
+                            <select id="tarjeta" name="tarjeta" required>
+                                <% if (tarjetas.length > 0) { %>
+                                    <% tarjetas.forEach((tarjeta) => { %>
+                                        <option value="<%= tarjeta.NumeroTarjeta %>">
+                                            **** **** **** <%= tarjeta.UltimosCuatroDigitos %> - <%= tarjeta.NombreTitular %>
+                                        </option>
+                                    <% }) %>
+                                <% } else { %>
+                                    <option value="" disabled>No tienes tarjetas registradas</option>
+                                <% } %>
+                            </select>
+                            <button type="submit" class="checkout-btn">Proceder con el pago</button>
+                        </form>
+                    </div>
+                </div>
+            <% } else { %>
+                <p>Tu carrito está vacío.</p>
+            <% } %>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 EasyTicket - Todos los derechos reservados.</p>
+        </footer>
+    </section>
+</body>
+</html>

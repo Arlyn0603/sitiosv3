@@ -1,0 +1,183 @@
+body {
+  color: #fff; /* Color blanco para todo el texto */
+  background-color: #111; /* Fondo oscuro para el contraste */
+}
+/* Títulos y textos importantes */
+h1, h2, p {
+  color: #fff; /* Asegura que los títulos y párrafos tengan texto blanco */
+}
+input[type="text"], input[type="number"] {
+  color: #fff; /* Texto blanco para los campos de entrada */
+}
+.cart-item-info {
+  color: #fff; /* Asegura que el texto dentro de los artículos del carrito sea blanco */
+}
+/* Contenido principal */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  main h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+  }
+  
+  /* Contenedor general para carrito + resumen */
+  .cart-content {
+    display: flex;
+    flex-wrap: wrap; /* Para que en pantallas pequeñas se apilen */
+    gap: 2rem;
+  }
+  
+  /* Lista de eventos */
+  .cart-container {
+    flex: 2; 
+    background-color: #111;
+    border: 1px solid #64DD17; /* Borde verde */
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .header {
+    position: relative; /* o elimina position:absolute si no es necesario */
+    z-index: 10;
+}
+  /* Cada evento en el carrito */
+  .cart-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+  }
+  
+  .cart-item:last-child {
+    border-bottom: none;
+  }
+  
+  .cart-item-image img {
+    width: 120px;
+    height: auto;
+    border-radius: 4px;
+    margin-right: 1rem;
+  }
+  
+  .cart-item-info {
+    flex: 1;
+  }
+  
+  .cart-item-info h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Formularios en línea (para actualizar y eliminar) */
+  .form-inline {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  
+  .form-inline input[type="number"] {
+    width: 60px;
+    padding: 0.25rem;
+    border: 1px solid #444;
+    background-color: #000;
+    color: #fff;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+  
+  .form-inline button {
+    background-color: #64DD17;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    color: #000;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  
+  .delete-btn {
+    margin-left: 1rem;
+    background-color: #ff4545; /* Botón rojo para Eliminar */
+  }
+  
+  /* Resumen del carrito */
+  .cart-summary {
+    flex: 1;
+    background-color: #111;
+    border: 1px solid #64DD17;
+    border-radius: 8px;
+    padding: 1rem;
+    height: fit-content; /* Para que no sea muy alto si hay pocos items */
+    min-width: 280px;
+  }
+  
+  .cart-summary h2 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+  
+  .cart-summary p {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Código promocional */
+  .promo-code {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .promo-code input {
+    flex: 1;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #000;
+    color: #fff;
+  }
+  
+  .promo-code button {
+    background-color: #64DD17;
+    color: #000;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  /* Botón de checkout */
+  .checkout-btn {
+    background-color: #64DD17;
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    width: 100%;
+  }
+  
+  /* Pie de página */
+  footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #111;
+    color: #fff;
+    margin-top: 2rem;
+  }
+  
+  /* Responsividad básica: en pantallas muy pequeñas, que todo se apile */
+  @media (max-width: 768px) {
+    .cart-content {
+      flex-direction: column;
+    }
+  }

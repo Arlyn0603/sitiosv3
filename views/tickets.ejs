@@ -1,0 +1,421 @@
+<!-- tickets.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Tickets de Soporte - EasyTicket</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/secciones.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1, h2, h3 {
+            color: #bfff00; /* Verde lima */
+            text-align: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #e0e0e0;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #bfff00;
+        }
+
+        .ticket-message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+        }
+
+        .staff-message {
+            background-color: #263238;
+            border-left: 4px solid #4fc3f7;
+        }
+
+        .user-message {
+            background-color: #33691e;
+            border-left: 4px solid #bfff00;
+        }
+
+        .tickets-container {
+            max-width: 600px;
+            margin: 120px auto 0 auto;
+            padding: 1rem;
+        }
+
+        .ticket-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #1a1a1a;
+        }
+
+        .ticket-item:hover {
+            background-color: #2a2a2a;
+            box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .ticket-info {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #aaa;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .status.abierto {
+            background-color: #464646;
+            color: #64DD17;
+        }
+
+        .status.en_proceso {
+            background-color: #78909c;
+            color: #e0e0e0;
+        }
+
+        .status.resuelto {
+            background-color: #66bb6a;
+            color: #e0f2f1;
+        }
+
+        .status.cerrado {
+            background-color: #757575;
+            color: #f5f5f5;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #64DD17;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+        }
+
+        
+
+        .btn-primary {
+            background-color: #64DD17;
+            color: #121212;
+        }
+
+        .btn-primary:hover {
+            background-color: #64DD17;
+        }
+
+        main {
+            padding-top: 0;
+        }
+        /* Agrega estos estilos */
+        .messages-container {
+            margin: 1.5rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .ticket-date {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .reply-form {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #444;
+        }
+
+        .reply-form h3 {
+            margin-bottom: 1rem;
+            color: #64DD17;
+        }
+
+        .reply-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <section class="principal">
+        <header class="header">
+            <a href="/" class="logo">
+                <img src="/img/logo.png" alt="EasyTicket">
+            </a>
+            <nav class="nav">
+                <a href="#">Conciertos</a>
+                <a href="#">Deportes</a>
+                <a href="#">Teatro</a>
+                <a href="#">Culturales</a>
+                <a href="#">Comedia</a>
+                <a href="#">Festivales</a>
+            </nav>
+            <% if (user) { %>
+                <!-- Botón de perfil (visible cuando el usuario está autenticado) -->
+                <div class="profile-dropdown">
+                    <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="/img/user.png" alt="Perfil">
+                        <span id="profileEmail"><%= user.email %></span> <!-- Mostrar el correo aquí -->
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/historial">Historial</a> <!-- Cambiado de "Perfil" a "Historial" -->
+                        <a href="/billetera">Billetera</a>
+                        <a href="/atencion/tickets/vista">Mis Tickets</a>
+                        <a href="/logout">Cerrar sesión</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Botón de iniciar sesión (visible cuando el usuario no está autenticado) -->
+                <button id="loginButton" onclick="openModal()">Iniciar sesión</button>
+            <% } %>
+        </header>
+
+        <script>
+            // Función para alternar el menú de perfil
+            function toggleProfileMenu() {
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            }
+        
+            // Cerrar el menú si se hace clic fuera de él
+            window.onclick = function(event) {
+                if (!event.target.matches('.profile-btn')) {
+                    const dropdownMenu = document.getElementById('dropdownMenu');
+                    if (dropdownMenu.style.display === 'block') {
+                        dropdownMenu.style.display = 'none';
+                    }
+                }
+            }
+        
+        </script>
+
+        <main class="tickets-container">
+            <h1>Mis Tickets de Soporte</h1>
+            <br><br>
+            <div id="ticketsList" class="tickets-list">
+                <% if (tickets && tickets.length > 0) { %>
+                    <% tickets.forEach(ticket => { %>
+                        <div class="ticket-item" data-id="<%= ticket.id %>">
+                            <h3><%= ticket.asunto %></h3>
+                            <p><%= ticket.descripcion %></p>
+                            <div class="ticket-info">
+                                <span class="status <%= ticket.estado.toLowerCase() %>">
+                                    <%= ticket.estado.replace('_', ' ') %>
+                                </span>
+                                <span>Creado: <%= new Date(ticket.fecha_creacion).toLocaleString() %></span>
+                                <span><%= ticket.respuestas_count %> respuestas</span>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p>No tienes tickets creados.</p>
+                <% } %>
+            </div>
+            
+            <!-- Modal para ver ticket -->
+            <div id="ticketModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2 id="modalTicketSubject"></h2>
+                    <div class="ticket-meta">
+                        <span id="modalTicketStatus" class="status"></span>
+                        <span id="modalTicketDate" class="ticket-date"></span>
+                    </div>
+                    
+                    <div id="modalTicketMessages" class="messages-container">
+                        <!-- Mensajes del ticket se cargarán aquí -->
+                    </div>
+                    
+                    <form id="replyTicketForm" class="reply-form">
+                        <h3>Responder al ticket</h3>
+                        <textarea id="replyMessage" placeholder="Escribe tu respuesta aquí..." required></textarea>
+                        <button type="submit" class="btn btn-primary">Enviar Respuesta</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ticketModal = document.getElementById('ticketModal');
+            const newTicketModal = document.getElementById('newTicketModal');
+            const newTicketBtn = document.getElementById('newTicketBtn');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+            
+            // Ya no necesitamos loadTickets() porque los tickets se renderizan en el servidor
+            
+            // Agregar event listeners a los tickets existentes
+            document.querySelectorAll('.ticket-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const ticketId = item.getAttribute('data-id');
+                    showTicketModal(ticketId);
+                });
+            });
+            
+            // ... (mantén el resto del código JavaScript igual) ...
+            
+            // Mostrar modal con detalles del ticket
+            async function showTicketModal(ticketId) {
+    try {
+        const response = await fetch(`/atencion/tickets/${ticketId}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al cargar ticket');
+        }
+        
+        const { ticket, mensajes } = await response.json();
+        
+        // Actualizar modal con los datos del ticket
+        document.getElementById('modalTicketSubject').textContent = ticket.asunto;
+        document.getElementById('modalTicketStatus').textContent = ticket.estado.replace('_', ' ');
+        document.getElementById('modalTicketStatus').className = `status ${ticket.estado.toLowerCase()}`;
+        document.getElementById('modalTicketDate').textContent = `Creado: ${new Date(ticket.fecha_creacion).toLocaleString()}`;
+        
+        // Mostrar mensajes
+        const messagesContainer = document.getElementById('modalTicketMessages');
+        const replyForm = document.getElementById('replyTicketForm');
+        
+        if (mensajes && mensajes.length > 0) {
+            messagesContainer.innerHTML = mensajes.map(msg => `
+                <div class="ticket-message ${msg.es_staff ? 'staff-message' : 'user-message'}">
+                    <p><strong>${msg.remitente}</strong> <small>${new Date(msg.fecha_envio).toLocaleString()}</small></p>
+                    <p>${msg.mensaje}</p>
+                </div>
+            `).join('');
+            
+            // Verificar si hay al menos una respuesta del staff
+            const hasStaffResponse = mensajes.some(msg => msg.es_staff);
+            
+            // Mostrar formulario solo si hay respuesta del staff
+            replyForm.style.display = hasStaffResponse ? 'block' : 'none';
+        } else {
+            messagesContainer.innerHTML = `
+                <div class="no-messages">
+                    <p>Este ticket aún no ha sido respondido.</p>
+                    <p>Nuestro equipo de soporte te responderá pronto.</p>
+                </div>
+            `;
+            replyForm.style.display = 'none';
+        }
+        
+        // Configurar formulario de respuesta
+        replyForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('replyMessage').value.trim();
+            if (!message) return;
+            
+            try {
+                const response = await fetch(`/atencion/tickets/${ticketId}/mensajes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensaje: message }),
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al enviar respuesta');
+                }
+                
+                document.getElementById('replyMessage').value = '';
+                showTicketModal(ticketId); // Recargar mensajes
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error al enviar respuesta');
+            }
+        };
+        
+        // Mostrar modal
+        document.getElementById('ticketModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Error al cargar el ticket');
+    }
+}
+
+            // Cerrar modales al hacer clic en la X
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('ticketModal').style.display = 'none';
+                    document.getElementById('newTicketModal').style.display = 'none';
+                });
+            });
+
+            // Cerrar modales al hacer clic fuera
+            window.addEventListener('click', (e) => {
+                if (e.target === document.getElementById('ticketModal')) {
+                    document.getElementById('ticketModal').style.display = 'none';
+                }
+                if (e.target === document.getElementById('newTicketModal')) {
+                    document.getElementById('newTicketModal').style.display = 'none';
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>

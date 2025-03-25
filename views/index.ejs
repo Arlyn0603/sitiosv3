@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Ticket</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/secciones.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <style>
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        .search-btn img {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <section class="principal">
+        <header class="header">
+            <a href="/" class="logo">
+                <img src="/img/logo.png" alt="EasyTicket">
+            </a>
+            <nav class="nav">
+                <a href="#">Conciertos</a>
+                <a href="#">Deportes</a>
+                <a href="#">Teatro</a>
+                <a href="#">Culturales</a>
+                <a href="#">Comedia</a>
+                <a href="#">Festivales</a>
+            </nav>
+            <% if (user) { %>
+                <!-- Botón de búsqueda (lupa) -->
+                <button class="search-btn" onclick="toggleSearchSection()">
+                    <img src="/img/lupa.png" alt="Buscar" width="20">
+                </button>
+                <!-- Botón de perfil -->
+                <div class="profile-dropdown">
+                    <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="/img/user.png" alt="Perfil">
+                        <span id="profileEmail"><%= user.email %></span>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/historial">Historial</a>
+                        <a href="/billetera">Billetera</a>
+                        <a href="/atencion/tickets/vista">Mis Tickets</a>
+                        <a href="/logout">Cerrar sesión</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Botón de búsqueda (lupa) para usuarios no autenticados -->
+                <button class="search-btn" onclick="toggleSearchSection()">
+                    <img src="/img/lupa.png" alt="Buscar" width="20">
+                </button>
+                <!-- Botón de iniciar sesión -->
+                <button id="loginButton" onclick="openModal()">Iniciar sesión</button>
+            <% } %>
+        </header>
+
+        <section class="hero">
+            <h1>No veas cómo te lo cuentan...</h1>
+            <p class="highlight">¡Vívelo en primera fila!</p>
+            <p>Encuentra tus boletos para conciertos, eventos y espectáculos.</p>
+            <button onclick="location.href='#eventos'">Ver eventos</button>
+        </section>
+
+        <div class="events-bar">
+            <span>Camilo</span>
+            <span>Chayanne</span>
+            <span>More than magic</span>
+            <span>Reggae Fest</span>
+            <span>Picnic 2025</span>
+            <span>Shawn Mendes</span>
+        </div>
+    </section>
+
+    
+
+<!-- 🔎 Sección de Búsqueda Avanzada -->
+<section id="searchSection" class="search-section">
+    <h2>Búsqueda Avanzada</h2>
+    <form id="search-form">
+        <div>
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" name="fecha">
+        </div>
+
+        <div>
+            <label for="ubicacion">Ubicación:</label>
+            <select id="ubicacion" name="ubicacion">
+                <option value="">Todas</option>
+                <option value="San José">San José</option>
+                <option value="Alajuela">Alajuela</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="tipo">Tipo de evento:</label>
+            <select id="tipo" name="tipo">
+                <option value="">Todos</option>
+                <option value="Concierto">Concierto</option>
+                <option value="Deporte">Deporte</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="precio">Precio máximo:</label>
+            <input type="number" id="precio" name="precio" placeholder="Máximo ₡">
+        </div>
+
+        <button type="submit">Buscar</button>
+    </form>
+</section>
+
+<!-- 🎟️ Sección de Eventos -->
+<section id="eventos" class="events-section">
+    <% eventos.forEach(evento => { %>
+        <div class="event" 
+            data-ubicacion="<%= evento.ubicacion %>" 
+            data-tipo="<%= evento.tipo %>" 
+            data-fecha="<%= evento.fecha %>" 
+            data-precio="<%= evento.precio %>">
+            
+            <img src="<%= evento.imagen %>" alt="<%= evento.nombre %>">
+            <div class="event-info">
+                <h3><%= evento.nombre %></h3>
+                <p>Ubicación: <%= evento.ubicacion %></p>
+                <p>Fecha: <%= evento.fecha %></p>
+                <p>Precio: ₡<%= evento.precio %></p>
+            </div>
+            <div class="event-actions">
+                <a href="/eventos/<%= evento.id %>" class="ver-evento-btn">Ver evento</a>
+            </div>
+        </div>
+    <% }); %>
+</section>
+
+    
+    
+
+    <script>
+         // Función para alternar la visibilidad del menú desplegable
+         function toggleProfileMenu() {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Cerrar el menú si se hace clic fuera de él
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-btn')) {
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                if (dropdownMenu.style.display === 'block') {
+                    dropdownMenu.style.display = 'none';
+                }
+            }
+        }
+
+        // Función para mostrar/ocultar la sección de búsqueda avanzada
+function toggleSearchSection() {
+    const searchSection = document.getElementById('searchSection');
+    searchSection.classList.toggle('visible');
+}
+
+// Función para filtrar eventos
+function filtrarEventos() {
+    const fechaSeleccionada = document.getElementById("fecha").value;
+    const ubicacionSeleccionada = document.getElementById("ubicacion").value;
+    const tipoSeleccionado = document.getElementById("tipo").value;
+    const precioMaximo = document.getElementById("precio").value;
+
+    document.querySelectorAll(".event").forEach(evento => {
+        const fechaEvento = evento.dataset.fecha;
+        const ubicacionEvento = evento.dataset.ubicacion;
+        const tipoEvento = evento.dataset.tipo;
+        const precioEvento = parseInt(evento.dataset.precio);
+
+        let mostrar = true;
+
+        if (fechaSeleccionada && fechaEvento !== fechaSeleccionada) mostrar = false;
+        if (ubicacionSeleccionada && ubicacionEvento !== ubicacionSeleccionada) mostrar = false;
+        if (tipoSeleccionado && tipoEvento !== tipoSeleccionado) mostrar = false;
+        if (precioMaximo && precioEvento > parseInt(precioMaximo)) mostrar = false;
+
+        evento.style.display = mostrar ? "block" : "none";
+    });
+}
+
+// Asignar la función de filtrado al formulario de búsqueda
+document.getElementById('search-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    filtrarEventos();
+});
+    </script>
+</body>
+<!-- 📩 Sección de Atención al Cliente -->
+<section class="customer-service">
+    <h2>Atención al Cliente</h2>
+    <form id="consultaForm" class="customer-form">
+        <label for="email">Correo Electrónico</label>
+        <input type="email" id="email" name="email" 
+               value="<%= user ? user.email : '' %>" 
+               placeholder="Tu correo" required>
+        <p>Se estará enviando una respuesta a tu correo electrónico lo más pronto posible</p>
+        <label for="message">Mensaje</label>
+        <textarea id="message" name="message" placeholder="Escribe tu mensaje aquí" required></textarea>
+        <button type="submit">Enviar</button>
+        <div id="consultaResult" style="margin-top: 10px;"></div>
+    </form>
+</section>
+
+<script>
+// Manejar envío de consulta
+document.getElementById('consultaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const resultDiv = document.getElementById('consultaResult');
+    
+    submitBtn.disabled = true;
+    resultDiv.textContent = 'Enviando...';
+    resultDiv.style.color = 'black';
+    
+    try {
+        const response = await fetch('/atencion/enviar-consulta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: formData.get('email'),
+                mensaje: formData.get('message')
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            resultDiv.textContent = result.message;
+            resultDiv.style.color = 'green';
+            e.target.reset();
+        } else {
+            resultDiv.textContent = result.error || 'Error al enviar la consulta';
+            resultDiv.style.color = 'red';
+        }
+    } catch (err) {
+        resultDiv.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        resultDiv.style.color = 'red';
+    } finally {
+        submitBtn.disabled = false;
+    }
+});
+</script>
+
+<!-- ❓ Sección de Preguntas Frecuentes -->
+<section class="faq">
+    <h2>Preguntas Frecuentes</h2>
+    <div class="faq-container" id="faqContainer">
+        <!-- Las FAQs se cargarán aquí dinámicamente -->
+    </div>
+</section>
+
+<script>
+// Cargar FAQs al cargar la página
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/atencion/faqs');
+        const faqs = await response.json();
+        
+        const container = document.getElementById('faqContainer');
+        
+        // Agrupar por categoría
+        const faqsPorCategoria = {};
+        faqs.forEach(faq => {
+            if (!faqsPorCategoria[faq.categoria]) {
+                faqsPorCategoria[faq.categoria] = [];
+            }
+            faqsPorCategoria[faq.categoria].push(faq);
+        });
+        
+        // Mostrar FAQs
+        for (const [categoria, items] of Object.entries(faqsPorCategoria)) {
+            const categoriaElement = document.createElement('div');
+            categoriaElement.className = 'faq-category';
+            categoriaElement.innerHTML = `<h3>${categoria}</h3>`;
+            
+            items.forEach(faq => {
+                const faqElement = document.createElement('div');
+                faqElement.className = 'faq-item';
+                faqElement.innerHTML = `
+                    <div class="faq-question">${faq.pregunta}</div>
+                    <div class="faq-answer">${faq.respuesta}</div>
+                `;
+                categoriaElement.appendChild(faqElement);
+            });
+            
+            container.appendChild(categoriaElement);
+        }
+    } catch (err) {
+        console.error('Error al cargar FAQs:', err);
+    }
+});
+</script>
+
+<!-- Modal de Inicio de Sesión -->
+<div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" name="email" placeholder="Tu correo" required>
+
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
+
+            <div class="actions">
+                <button type="submit" class="login">Iniciar Sesión</button>
+                <button type="button" class="register" onclick="openRegisterModal()">Registrarse</button>
+            </div>
+            <a href="#" class="forgot" onclick="openForgotPasswordModal()">Olvidé mi contraseña</a>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Registro -->
+<div id="registerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeRegisterModal()">&times;</span>
+        <h2>Registrarse</h2>
+        <form id="registerForm">
+            <label for="firstName">Nombres</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Tu nombre" required>
+
+            <label for="lastName">Apellidos</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Tus apellidos" required>
+
+            <label for="province">Provincia</label>
+            <select id="province" name="province" required>
+                <option value="">Seleccione una provincia</option>
+                <option value="Cartago">Cartago</option>
+                <option value="San José">San José</option>
+                <option value="Heredia">Heredia</option>
+                <option value="Alajuela">Alajuela</option>
+                <option value="Limón">Limón</option>
+                <option value="Guanacaste">Guanacaste</option>
+                <option value="Puntarenas">Puntarenas</option>
+            </select>
+
+            <label for="registerEmail">Correo Electrónico</label>
+            <input type="email" id="registerEmail" name="email" placeholder="Tu correo" required>
+
+            <label for="registerPassword">Contraseña</label>
+            <input type="password" id="registerPassword" name="password" placeholder="Tu contraseña" required>
+
+            <label for="confirmPassword">Confirmación Contraseña</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirma tu contraseña" required>
+
+            <button type="submit" class="register-button">Registrarse</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Recuperación de Contraseña -->
+<div id="forgotPasswordModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeForgotPasswordModal()">&times;</span>
+        <h2>Recuperar contraseña</h2>
+        <p>Digita el correo electrónico que ingresaste al registrarte y se te enviarán las instrucciones para restablecer la contraseña</p>
+        <form id="forgotPasswordForm">
+            <label for="forgotEmail">Correo Electrónico</label>
+            <input type="email" id="forgotEmail" name="email" placeholder="Tu correo" required>
+            <div class="actions">
+                <button type="button" class="cancel" onclick="closeForgotPasswordModal()">Cancelar</button>
+                <button type="submit" class="reset-password">Enviar Instrucciones</button>
+            </div>
+        </form>
+        <div id="forgotPasswordMessage" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+<!-- Modal de Autenticación de Dos Factores -->
+<div id="twoFactorModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeTwoFactorModal()">&times;</span>
+        <h2>Autentificación de dos factores</h2>
+        <p>Se te envió un código de verificación a tu correo electrónico</p>
+        <form id="verificationForm"> <!-- Añade un id al formulario -->
+            <label for="verificationCode">Código de verificación</label>
+            <input type="text" id="verificationCode" placeholder="Ingrese el código" required>
+            <div class="actions">
+                <button type="submit" class="verify">Verificación</button> <!-- Cambia a type="submit" -->
+            </div>
+        </form>
+        <a href="#" class="resend">Reenviar código</a>
+    </div>
+</div>
+<script>
+
+    // Función para manejar el envío del formulario de registro
+    document.getElementById("registerForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch("http://localhost:3005/usuarios/registrar", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Usuario registrado exitosamente");
+                closeRegisterModal();
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            console.error("❌ Error al registrar usuario", err);
+            alert("Error en el servidor. Inténtalo de nuevo más tarde.");
+        }
+    });
+    // Función para manejar el envío del formulario de inicio de sesión
+    document.getElementById("loginForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch("/usuarios/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Código de verificación enviado a tu correo.");
+                openTwoFactorModal(); // Abrir el modal de autenticación de dos factores
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            console.error("❌ Error al iniciar sesión", err);
+            alert("Error en el servidor. Inténtalo de nuevo más tarde.");
+        }
+    });
+
+   // Función para manejar el envío del formulario de autenticación de dos factores
+    document.getElementById("verificationForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const verificationCode = document.getElementById("verificationCode").value;
+
+        try {
+            const response = await fetch("/usuarios/verificarCodigo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ code: verificationCode }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                closeTwoFactorModal();
+                window.location.reload(); // This will refresh the page with the user session
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            console.error("❌ Error al verificar el código", err);
+            alert("Error en el servidor. Inténtalo de nuevo más tarde.");
+        }
+    });
+
+    // Manejo del formulario de recuperación de contraseña
+    document.getElementById("forgotPasswordForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const email = formData.get('email');
+        const messageDiv = document.getElementById('forgotPasswordMessage');
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        
+        // Mostrar estado de carga
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enviando...";
+        messageDiv.innerHTML = '';
+        
+        try {
+            const response = await fetch('/usuarios/solicitar-recuperacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                messageDiv.innerHTML = '<p style="color: green;">Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.</p>';
+                event.target.reset();
+                // Cierra el modal después de 3 segundos
+                setTimeout(() => {
+                    closeForgotPasswordModal();
+                }, 3000);
+            } else {
+                messageDiv.innerHTML = `<p style="color: red;">${result.message || 'Error al procesar la solicitud'}</p>`;
+            }
+        } catch (err) {
+            console.error('Error en la solicitud:', err);
+            messageDiv.innerHTML = '<p style="color: red;">Error al conectar con el servidor. Verifica tu conexión a internet.</p>';
+        } finally {
+            // Restaurar botón
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enviar Instrucciones";
+        }
+    });
+    
+    
+
+    function seleccionarEvento(nombre) {
+        alert("Evento seleccionado: " + nombre);
+    }
+
+    function openModal() {
+    document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('loginModal').style.display = 'none';
+    }
+
+    function openRegisterModal() {
+        closeModal();
+        document.getElementById('registerModal').style.display = 'flex';
+    }
+
+    function closeRegisterModal() {
+        document.getElementById('registerModal').style.display = 'none';
+    }
+
+    function openForgotPasswordModal() {
+        closeModal();
+        document.getElementById('forgotPasswordModal').style.display = 'flex';
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgotPasswordModal').style.display = 'none';
+    }
+
+    function openTwoFactorModal() {
+        closeModal();
+        document.getElementById('twoFactorModal').style.display = 'flex';
+    }
+
+    function closeTwoFactorModal() {
+    document.getElementById('twoFactorModal').style.display = 'none';
+}
+
+    // Cerrar modales al hacer clic fuera de ellos
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+<script src="/js/filtro.js"></script>
+<script src="/js/main.js"></script>
+
+</html>

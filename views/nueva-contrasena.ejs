@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Contraseña - EasyTicket</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/contrasena.css">
+    <style>
+        .header {
+            position: relative; /* o elimina position:absolute si no es necesario */
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <section class="principal">
+        <header class="header">
+            <a href="/" class="logo">
+                <img src="/img/logo.png" alt="EasyTicket">
+            </a>
+        </header>
+
+        <section class="password-reset">
+            <h2>Restablecer Contraseña</h2>
+            <form id="resetPasswordForm">
+                <input type="hidden" id="token" name="token" value="<%= token %>">
+                
+                <label for="nuevaContrasena">Nueva Contraseña:</label>
+                <input type="password" id="nuevaContrasena" name="nuevaContrasena" required>
+                
+                <label for="confirmarContrasena">Confirmar Contraseña:</label>
+                <input type="password" id="confirmarContrasena" name="confirmarContrasena" required>
+                
+                <button type="submit">Actualizar Contraseña</button>
+            </form>
+            <div id="message" style="margin-top: 20px;"></div>
+        </section>
+    </section>
+
+    <script>
+        document.getElementById('resetPasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/usuarios/actualizar-contrasena', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('message').innerHTML = `
+                        <p style="color: green;">${result.message}</p>
+                        <p>Ahora puedes <a href="/">iniciar sesión</a> con tu nueva contraseña.</p>
+                    `;
+                    e.target.reset();
+                } else {
+                    document.getElementById('message').innerHTML = `
+                        <p style="color: red;">${result.message}</p>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                document.getElementById('message').innerHTML = `
+                    <p style="color: red;">Error al procesar la solicitud</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

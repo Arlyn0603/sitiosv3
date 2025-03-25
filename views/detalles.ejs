@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= evento.nombre %> - Detalles</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+   
+</head>
+<body>
+    
+    <section class="event-details">
+        <h2><%= evento.nombre %></h2>
+        <img src="<%= evento.imagen %>" alt="<%= evento.nombre %>">
+        <p><strong>Ubicación:</strong> <%= evento.ubicacion %></p>
+        <p><strong>Fecha:</strong> <%= evento.fecha %></p>
+        <p><strong>Precio:</strong> ₡<%= evento.precio %></p>
+        <p><strong>Disponibilidad:</strong> <%= evento.disponibilidad %></p>
+        <p><strong>Horarios:</strong> <%= evento.horarios %></p>
+
+        <h3>Ubicación de asientos</h3>
+        <img src="/img/asientos.png" alt="Mapa de asientos">
+        
+        <a href="/" class="btn-verde">Volver</a>
+    </section>
+</body>
+</html>

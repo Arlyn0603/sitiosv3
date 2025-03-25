@@ -1,0 +1,74 @@
+/* Estilos para recuperación de contraseña */
+.password-reset {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #818181;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.password-reset h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.password-reset form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.password-reset label {
+    font-weight: bold;
+}
+
+.password-reset input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.password-reset button {
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.password-reset button:hover {
+    background-color: #45a049;
+}
+
+.invalid-link {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.invalid-link h2 {
+    color: #d9534f;
+    margin-bottom: 20px;
+}
+
+.invalid-link p {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.invalid-link a {
+    color: #337ab7;
+    text-decoration: none;
+}
+
+.invalid-link a:hover {
+    text-decoration: underline;
+}

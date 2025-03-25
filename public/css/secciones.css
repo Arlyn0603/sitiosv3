@@ -1,0 +1,179 @@
+/* Sección de Eventos */
+.events-section,
+.customer-service,
+.faq {
+    width: 100%;
+    padding: 50px 20px;
+    background-color: black;
+    color: white;
+    border-top: 2px solid #aaff00; /* Línea verde entre secciones */
+}
+.events-section:first-of-type {
+    border-top: none; /* Evita línea verde antes de la primera sección */
+}
+.events-section {
+    margin-top: 50px; /* Espacio entre la sección principal y eventos */
+}
+.event {
+    display: flex;
+    align-items: center;
+    border: 2px solid #aaff00;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+.event img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+.event-info {
+    flex-grow: 1;
+}
+.event-info h3 {
+    margin: 0;
+}
+.event-btn {
+    background-color: #aaff00;
+    color: black;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* Sección de Atención al Cliente */
+.customer-service {
+    margin-top: 50px;
+}
+.customer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.customer-form input, .customer-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #aaff00;
+    background-color: #222;
+    color: white;
+}
+.customer-form button {
+    background-color: #aaff00;
+    color: black;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* Sección de Preguntas Frecuentes */
+.faq {
+    margin-top: 50px;
+}
+.faq-item {
+    border: 1px solid #aaff00;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.faq-item h3 {
+    color: #aaff00;
+    margin: 0;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #aaff00;
+}
+
+/* Estilos para la sección de búsqueda avanzada */
+.search-section {
+    background: rgba(0, 0, 0, 0.8); /* Fondo oscuro con transparencia */
+    color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 20px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: none; /* Oculto por defecto */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.search-section.visible {
+    display: block; /* Mostrar cuando tenga la clase "visible" */
+}
+
+.search-section h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #aaff00; /* Verde neón */
+}
+
+#search-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+#search-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #aaff00; /* Verde neón */
+}
+
+#search-form input,
+#search-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aaff00; /* Borde verde neón */
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #222; /* Fondo oscuro */
+    color: white;
+    transition: border-color 0.3s ease;
+}
+
+#search-form input:focus,
+#search-form select:focus {
+    border-color: #aaff00; /* Borde verde neón al enfocar */
+    outline: none;
+}
+
+#search-form button {
+    width: 100%;
+    background: #aaff00; /* Verde neón */
+    color: black;
+    font-size: 18px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#search-form button:hover {
+    background: #88cc00; /* Verde más oscuro al pasar el mouse */
+    transform: scale(1.05);
+}
+
+/* Estilos para los botones de "Ver Evento" */
+.ver-evento-btn {
+    display: inline-block;
+    padding: 8px 16px; /* Tamaño más pequeño */
+    background-color: #aaff00; /* Verde neón */
+    color: black; /* Texto en negro */
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 14px; /* Tamaño de fuente más pequeño */
+}
+
+.ver-evento-btn:hover {
+    background-color: #88cc00; /* Verde más oscuro al pasar el mouse */
+    transform: scale(1.05); /* Efecto de escala */
+}

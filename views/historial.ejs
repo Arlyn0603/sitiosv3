@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Compras</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/carrito.css">
+    <link rel="stylesheet" href="/css/secciones.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/historial.css"> 
+</head>
+<body>
+    <section class="principal">
+        <header class="header">
+            <a href="/" class="logo">
+                <img src="/img/logo.png" alt="EasyTicket">
+            </a>
+            <nav class="nav">
+                <a href="#">Conciertos</a>
+                <a href="#">Deportes</a>
+                <a href="#">Teatro</a>
+                <a href="#">Culturales</a>
+                <a href="#">Comedia</a>
+                <a href="#">Festivales</a>
+            </nav>
+            <% if (user) { %>
+                <!-- Botón de perfil (visible cuando el usuario está autenticado) -->
+                <div class="profile-dropdown">
+                    <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="/img/user.png" alt="Perfil">
+                        <span id="profileEmail"><%= user.email %></span> <!-- Mostrar el correo aquí -->
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/historial">Historial</a> <!-- Cambiado de "Perfil" a "Historial" -->
+                        <a href="/billetera">Billetera</a>
+                        <a href="/atencion/tickets/vista">Mis Tickets</a>
+                        <a href="/logout">Cerrar sesión</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Botón de iniciar sesión (visible cuando el usuario no está autenticado) -->
+                <button id="loginButton" onclick="openModal()">Iniciar sesión</button>
+            <% } %>
+        </header>
+        <script>
+            // Función para alternar el menú de perfil
+            function toggleProfileMenu() {
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            }
+        
+            // Cerrar el menú si se hace clic fuera de él
+            window.onclick = function(event) {
+                if (!event.target.matches('.profile-btn')) {
+                    const dropdownMenu = document.getElementById('dropdownMenu');
+                    if (dropdownMenu.style.display === 'block') {
+                        dropdownMenu.style.display = 'none';
+                    }
+                }
+            }
+        
+        </script>
+        <main>
+            <h1>Historial de compras</h1>
+
+            <% if (errorMessage) { %>
+                <div class="error-message"><%= errorMessage %></div>
+            <% } %>
+
+            <% if (historial.length > 0) { %>
+                <% historial.forEach(compra => { %>
+                    <div class="compra-card">
+                        <img src="/img/evento.jpg" alt="<%= compra.NombreEvento %>" class="compra-img">
+                        <div class="compra-info">
+                            <h2><%= compra.NombreEvento %></h2>
+                            <p class="ubicacion"><%= compra.Ubicacion %></p>
+                            <p class="estado" data-id="<%= compra.Id %>">
+                                <%= compra.Cantidad %> Entradas <%= compra.Estado %>
+                            </p>
+                            <div class="acciones">
+                                <button class="btn-reenviar">Reenviar Boletos</button>
+                                <a href="javascript:void(0);" 
+                                class="btn-ver" 
+                                onclick="abrirModal({
+                                    Zona: '<%= compra.Zona %>',
+                                    Ubicacion: '<%= compra.Ubicacion %>',
+                                    Estado: '<%= compra.Estado %>',
+                                    Total: '<%= compra.Total %>',
+                                    Cantidad: '<%= compra.Cantidad %>',
+                                    NombreEvento: '<%= compra.NombreEvento %>'
+                                })">
+                                Ver Compra
+                             </a>                                <button onclick="mostrarInputCancelar('<%= compra.Id %>')" 
+                                    <%= compra.Estado === 'Cancelado' ? 'disabled' : '' %>>
+                                Cancelar
+                            </button>
+                            
+                            <form id="form-cancelar-<%= compra.Id %>" 
+                                class="form-cancelar" 
+                                style="display: none;" 
+                                onsubmit="cancelarCompra(event, '<%= compra.Id %>')">
+                              <input type="text" 
+                                     id="razon-<%= compra.Id %>" 
+                                     placeholder="Escribe 'accidente' para confirmar" 
+                                     required>
+                              <button type="submit">Confirmar Cancelación</button>
+                          </form>
+                        </div>
+                        <div id="modal-compra" class="modal" style="display: none;">
+                            <div class="modal-content">
+                                <span class="close" onclick="cerrarModal()">&times;</span>
+                                <h2>Detalles de la Compra</h2>
+                                <p><strong>Zona:</strong> <span id="modal-zona"></span></p>
+                                <p><strong>Ubicación:</strong> <span id="modal-ubicacion"></span></p>
+                                <p><strong>Estado:</strong> <span id="modal-estado"></span></p>
+                                <p><strong>Total:</strong> ₡<span id="modal-total"></span></p>
+                                <p><strong>Cantidad:</strong> <span id="modal-cantidad"></span></p>
+                                <p><strong>Nombre del Evento:</strong> <span id="modal-nombre-evento"></span></p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No tienes compras registradas.</p>
+            <% } %>
+
+            <!-- Historial estático -->
+<h1>Historial de compras pasadas</h1>
+<div class="compra-card">
+    <img src="/img/evento.jpg" alt="Coldplay" class="compra-img">
+    <div class="compra-info">
+        <h2>Coldplay</h2>
+        <p class="ubicacion">Estadio Nacional</p>
+        <p class="estado">Canjeado</p>
+        <div class="acciones">
+            <button class="btn-reenviar">Reenviar Boletos</button>
+            <a href="javascript:void(0);" 
+               class="btn-ver" 
+               onclick="abrirModal({
+                   Zona: 'VIP',
+                   Ubicacion: 'San José',
+                   Estado: 'Canjeado',
+                   Total: '150000',
+                   Cantidad: '2',
+                   NombreEvento: 'Coldplay World Tour'
+               })">
+               Ver Compra
+            </a>
+        </div>
+    </div>
+</div>
+<div class="compra-card">
+    <img src="/img/evento.jpg" alt="Teatro Nacional" class="compra-img">
+    <div class="compra-info">
+        <h2>Obra de Teatro</h2>
+        <p class="ubicacion">Teatro Nacional</p>
+        <p class="estado">Canjeado</p>
+        <div class="acciones">
+            <button class="btn-reenviar">Reenviar Boletos</button>
+            <a href="javascript:void(0);" 
+               class="btn-ver" 
+               onclick="abrirModal({
+                   Zona: 'Platea',
+                   Ubicacion: 'San José',
+                   Estado: 'Canjeado',
+                   Total: '75000',
+                   Cantidad: '3',
+                   NombreEvento: 'Obra de Teatro'
+               })">
+               Ver Compra
+            </a>
+        </div>
+    </div>
+</div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 EasyTicket - Todos los derechos reservados.</p>
+        </footer>
+    </section>
+
+    <script>
+         function abrirModal(compra) {
+        // Cargar los datos en el modal
+        document.getElementById("modal-zona").textContent = compra.Zona;
+        document.getElementById("modal-ubicacion").textContent = compra.Ubicacion;
+        document.getElementById("modal-estado").textContent = compra.Estado;
+        document.getElementById("modal-total").textContent = compra.Total;
+        document.getElementById("modal-cantidad").textContent = compra.Cantidad;
+        document.getElementById("modal-nombre-evento").textContent = compra.NombreEvento;
+
+        // Mostrar el modal
+        document.getElementById("modal-compra").style.display = "block";
+    }
+
+    function cerrarModal() {
+        // Ocultar el modal
+        document.getElementById("modal-compra").style.display = "none";
+    }
+        // Muestra/oculta el formulario para cancelar
+        function mostrarInputCancelar(id) {
+            const form = document.getElementById(`form-cancelar-${id}`);
+            form.style.display = form.style.display === "none" ? "block" : "none";
+        }
+    
+        // Función para cancelar la compra
+ 
+    async function cancelarCompra(event, id) {
+        event.preventDefault(); // Evita que el formulario recargue la página
+
+        const razonInput = document.getElementById(`razon-${id}`);
+        const razon = razonInput.value.trim();
+
+        if (razon.toLowerCase() !== "accidente") {
+            alert("Debes escribir exactamente 'accidente' para cancelar.");
+            return;
+        }
+
+        try {
+            // Enviar la solicitud al servidor
+            const response = await fetch(`/compras/cancelar/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ razon }),
+            });
+
+            if (response.ok) {
+                // Actualizar el estado en la interfaz
+                const estadoElement = document.querySelector(`.estado[data-id="${id}"]`);
+                if (estadoElement) {
+                    estadoElement.textContent = "Cancelado";
+                }
+
+                // Ocultar el formulario
+                const form = document.getElementById(`form-cancelar-${id}`);
+                if (form) {
+                    form.style.display = "none";
+                }
+
+                // Deshabilitar el botón de cancelar
+                const cancelButton = document.querySelector(`button[onclick="mostrarInputCancelar('${id}')"]`);
+                if (cancelButton) {
+                    cancelButton.disabled = true;
+                }
+
+                alert("Compra cancelada exitosamente.");
+            } else {
+                const error = await response.json();
+                alert(`Error al cancelar la compra: ${error.message}`);
+            }
+        } catch (err) {
+            console.error("Error al cancelar la compra:", err);
+            alert("Ocurrió un error al cancelar la compra.");
+        }
+    }
+
+// Función auxiliar para actualizar la interfaz
+function updateUIAfterCancel(id) {
+    const estadoElement = document.querySelector(`.estado[data-id="${id}"]`);
+    if (estadoElement) {
+        // Conserva la cantidad y solo cambia el estado
+        estadoElement.textContent = estadoElement.textContent.replace(
+            /(No canjeada|Pendiente|Aprobada)/, 
+            "Cancelado"
+        );
+        
+        // Oculta el formulario
+        const form = document.getElementById(`form-cancelar-${id}`);
+        if (form) form.style.display = "none";
+        
+        // Deshabilita el botón
+        const cancelButton = document.querySelector(
+            `button[onclick="mostrarInputCancelar('${id}')"]`
+        );
+        if (cancelButton) cancelButton.disabled = true;
+    }
+}
+    </script>
+</body>
+</html>

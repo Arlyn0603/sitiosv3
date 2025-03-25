@@ -1,0 +1,195 @@
+/* Reset margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto; /* Permite desplazamiento vertical */
+    background-color: black;
+    margin: 0;
+    padding: 0;
+}
+
+/* Adjusted padding-top for the main content */
+.principal {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    
+}
+
+.header {
+    position: relative; /* o elimina position:absolute si no es necesario */
+    z-index: 10;
+}
+
+
+.hero {
+    background: url('../img/fondo.png') no-repeat center center/cover;
+}
+
+
+.payment-methods {
+    background-color: #1c1c1c;
+    color: black;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Métodos de Pago Section */
+
+.payment-methods h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.payment-method-item {
+    background-color: #2d2d2d;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-method-item p {
+    font-size: 16px;
+}
+
+.edit-btn {
+    background-color: yellow;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.delete-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.edit-btn:hover {
+    background-color: rgb(88, 88, 15);
+}
+
+.delete-btn:hover {
+    background-color: rgb(75, 12, 12);
+}
+
+.add-payment-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.add-payment-btn:hover {
+    background-color: #4CAF50;
+}
+
+/* Estilos para el formulario de tarjeta */
+.formulario-tarjeta {
+    background-color: #2d2d2d;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: white;
+    display: none; /* Oculto inicialmente */
+}
+
+.formulario-tarjeta label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: white;
+}
+
+.formulario-tarjeta input,
+.formulario-tarjeta select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #1c1c1c;
+    color: white;
+    font-size: 14px;
+}
+
+.formulario-tarjeta input::placeholder {
+    color: #888;
+}
+
+.formulario-tarjeta button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 16px;
+}
+
+.formulario-tarjeta button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.payment-method-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.payment-method-item p {
+    margin: 5px 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+.edit-btn, .delete-btn {
+    padding: 8px 15px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
