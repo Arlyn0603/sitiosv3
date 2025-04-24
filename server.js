@@ -12,7 +12,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 // Habilitar CORS para todas las rutas
 app.use(cors({
-    origin: 'http://localhost:3003', // Ajusta según tu URL frontend
+    origin: 'http://localhost:3000', // Ajusta según tu URL frontend
     credentials: true
 }));
 
@@ -45,12 +45,12 @@ app.use((req, res, next) => {
 let carrito = [];
 
 // Importar rutas
-const eventosRoutes = require("./routes/eventos");
-app.use("/eventos", eventosRoutes);
+const eventosRoutes = require("./routes/evento");
+app.use("/evento", eventosRoutes);
 
 // Ruta principal
 app.get("/", (req, res) => {
-    res.redirect("/eventos");
+    res.redirect("/evento");
 });
 
 // Ruta para cerrar sesión
@@ -64,23 +64,31 @@ app.get("/logout", (req, res) => {
     });
 });
 
-// Ruta para mostrar el carrito
-// Ruta para mostrar el carrito
-app.post("/carrito", (req, res) => {
-    const { nombre, fecha, horario, ubicacion, zona, cantidad } = req.body;
-    const precio = obtenerPrecioZona(zona);
-    carrito.push({ 
-        nombre, 
-        fecha, 
-        horario, 
-        ubicacion, 
-        zona, 
-        cantidad: parseInt(cantidad), 
-        precio 
+// Ruta para agregar al carrito (modificada para manejar asientos)
+app.post("/carrito/agregar", (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/usuarios/login');
+    }
+
+    const { eventoId, eventoNombre, bloqueId, bloqueNombre, precio, asientos } = req.body;
+    
+    // Convertir asientos a array si es un string (cuando solo se selecciona 1 asiento)
+    const asientosArray = Array.isArray(asientos) ? asientos : [asientos];
+    
+    carrito.push({
+        eventoId,
+        eventoNombre,
+        bloqueId,
+        bloqueNombre,
+        precio: parseFloat(precio),
+        asientos: asientosArray,
+        cantidad: asientosArray.length
     });
+    
     res.redirect("/carrito");
 });
 
+// Ruta para mostrar el carrito
 app.get("/carrito", async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/usuarios/login');
@@ -93,23 +101,84 @@ app.get("/carrito", async (req, res) => {
         const result = await request.execute('ObtenerTarjetasPorEmail');
         
         const tarjetas = result.recordset || [];
-        const subtotal = carrito.reduce((acc, item) => acc + item.cantidad * item.precio, 0);
+        const subtotal = carrito.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
         const impuestos = subtotal * 0.13;
         const total = subtotal + impuestos;
         
-        res.render("carrito", { carrito, subtotal, impuestos, total, tarjetas, successMessage: null, errorMessage: null });
+        res.render("carrito", { 
+            carrito, 
+            subtotal, 
+            impuestos, 
+            total, 
+            tarjetas, 
+            successMessage: null, 
+            errorMessage: null 
+        });
     } catch (err) {
         console.error('Error al obtener tarjetas:', err);
-        res.render("carrito", { carrito, subtotal: 0, impuestos: 0, total: 0, tarjetas: [], successMessage: null, errorMessage: 'Error al obtener tarjetas' });
+        res.render("carrito", { 
+            carrito, 
+            subtotal: 0, 
+            impuestos: 0, 
+            total: 0, 
+            tarjetas: [], 
+            successMessage: null, 
+            errorMessage: 'Error al obtener tarjetas' 
+        });
     }
 });
-
-// Ruta para modificar la cantidad de un ítem en el carrito
-app.post("/carrito/modificar", (req, res) => {
-    const { index, cantidad } = req.body;
-    carrito[index].cantidad = parseInt(cantidad);
-    res.redirect("/carrito");
+// Rutas de preventa
+// Ruta para preventa admin
+app.get('/preventa-admin', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        
+        // Obtener eventos
+        const eventosResult = await pool.request().query(`
+            SELECT e.eventoId, e.nombre, e.tipo, e.fecha, 
+                   l.nombre AS lugarNombre, l.id AS lugarId
+            FROM Evento e
+            JOIN Lugares l ON e.lugarId = l.id
+            ORDER BY e.fecha DESC
+        `);
+        
+        // Obtener lugares
+        const lugaresResult = await pool.request().query(`
+            SELECT id, nombre FROM Lugares ORDER BY nombre
+        `);
+        
+        // Obtener métodos de pago disponibles
+        const metodosPagoResult = await pool.request().query(`
+            SELECT DISTINCT TipoTarjeta 
+            FROM Tarjetas
+            WHERE TipoTarjeta IN ('Visa', 'Mastercard', 'American Express')
+        `);
+        
+        res.render('preventa-admin', {
+            user: req.session.user || null,
+            eventos: eventosResult.recordset,
+            lugares: lugaresResult.recordset,
+            metodosPagoDisponibles: metodosPagoResult.recordset,
+            preventa: null // Inicialmente null, se puede cargar si hay un evento específico
+        });
+    } catch (error) {
+        console.error('Error loading preventa admin page:', error);
+        res.status(500).send('Error loading preventa admin page');
+    }
 });
+// Agrega esto en tu server.js, preferiblemente con las otras rutas similares
+// Con esta:
+app.get('/configuracion', (req, res) => {
+    res.render('configuracion'); // Esto renderizará views/configuracion.ejs
+});
+
+
+// Importar rutas de empleados
+const empleadosRouter = require('./routes/empleados');
+app.use('/empleados', empleadosRouter);
+
+const chatbotRoutes = require('./routes/chatbot');
+app.use('/api', chatbotRoutes);
 
 // Ruta para eliminar un ítem del carrito
 app.post("/carrito/eliminar", (req, res) => {
@@ -118,8 +187,7 @@ app.post("/carrito/eliminar", (req, res) => {
     res.redirect("/carrito");
 });
 
-// Ruta para procesar la compra
-// Ruta para procesar la compra
+// Ruta para procesar la compra (modificada para manejar asientos)
 app.post("/comprar", async (req, res) => {
     const { tarjeta } = req.body;
 
@@ -187,17 +255,17 @@ app.post("/comprar", async (req, res) => {
 
         for (const item of carrito) {
             await request
-                .input('zona', sql.NVarChar, item.zona)
+                .input('bloque', sql.NVarChar, item.bloqueNombre) // Asegúrate de que 'bloqueNombre' tenga un valor válido
                 .input('cantidad', sql.Int, item.cantidad)
                 .input('NumeroTarjetaCompra', sql.VarChar, tarjeta)
                 .input('EmailCliente', sql.VarChar, req.session.user.email)
                 .input('Total', sql.Decimal(10, 2), totalCompra)
-                .input('nombreEvento', sql.NVarChar(255), item.nombre)
-                .input('ubicacion', sql.NVarChar(255), item.ubicacion)
+                .input('nombreEvento', sql.NVarChar(255), item.eventoNombre)
+                .input('ubicacion', sql.NVarChar(255), item.bloqueNombre)
                 .query(`
                     INSERT INTO Compras (
-                        zona, 
-                        cantidad, 
+                        Bloque, 
+                        Cantidad, 
                         NumeroTarjeta, 
                         EmailCliente, 
                         Total,
@@ -206,7 +274,7 @@ app.post("/comprar", async (req, res) => {
                         estado
                     ) 
                     VALUES (
-                        @zona, 
+                        @bloque, 
                         @cantidad, 
                         @NumeroTarjetaCompra, 
                         @EmailCliente, 
@@ -272,11 +340,12 @@ app.post("/comprar", async (req, res) => {
         });
     }
 });
+
+// Ruta para cancelar compra
 app.post("/compras/cancelar/:id", async (req, res) => {
     const { id } = req.params;
     const { razon } = req.body;
-    console.log("ID:", req.params.id);
-    console.log("Razón:", req.body.razon);
+    
     if (razon.toLowerCase() !== "accidente") {
         return res.status(400).json({
             success: false,
@@ -304,6 +373,7 @@ app.post("/compras/cancelar/:id", async (req, res) => {
     }
 });
 
+// Ruta para ver historial de compras
 app.get("/historial", async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/usuarios/login');
@@ -321,8 +391,7 @@ app.get("/historial", async (req, res) => {
         console.error('Error al obtener el historial de compras:', err);
         res.render("historial", { historial: [], errorMessage: 'Error al obtener el historial de compras' });
     }
-});  
-
+});
 // Función para obtener el precio de una zona
 function obtenerPrecioZona(zona) {
     const precios = {
@@ -351,7 +420,47 @@ app.use('/factura', facturaRoutes)
 
 const atencionRoutes = require('./routes/atencion');
 app.use('/atencion', atencionRoutes);
+app.get('/usuario', (req, res) => {
+    res.render('usuario'); // Asegúrate de que 'usuario.ejs' esté en la carpeta 'views'
+});
 
+app.get('/administrador', (req, res) => {
+    res.render('administrador'); // Asegúrate de que 'usuario.ejs' esté en la carpeta 'views'
+});
+
+app.get('/informacion_u', (req, res) => {
+    if (req.session.user) { // Verifica si el usuario está autenticado
+        res.render('informacion_u', { user: req.session.user }); // Pasa la información del usuario al EJS
+    } else {
+        res.redirect('/usuarios/login'); // Redirige al login si no está autenticado
+    }
+});
+
+app.get('/usuario/informacion', (req, res) => {
+    if (req.isAuthenticated()) { // Verifica si el usuario está autenticado
+        res.render('informacion_u', { user: req.user }); // Pasa la información del usuario al EJS
+    } else {
+        res.redirect('/login'); // Redirige al login si no está autenticado
+    }
+});
+
+app.post('/usuario/actualizar', (req, res) => {
+    const { firstName, lastName, email, password } = req.body;
+
+    // Actualiza la información del usuario en la base de datos
+    User.findByIdAndUpdate(req.user._id, {
+        firstName,
+        lastName,
+        email,
+        ...(password && { password }) // Solo actualiza la contraseña si se proporciona
+    }, { new: true }, (err, updatedUser) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error al actualizar la información del usuario.');
+        }
+        res.redirect('/usuario/informacion'); // Redirige a la misma página después de guardar
+    });
+});
 // Configuración de Socket.io
 io.on('connection', (socket) => {
     console.log('Usuario conectado al chat');
@@ -372,9 +481,57 @@ io.on('connection', (socket) => {
         console.log('Usuario desconectado del chat');
     });
 });
+ 
+const analisisRoutes = require('./routes/analisis');
+app.use('/', analisisRoutes); // Cambia '/analisis' por '/'
+
+
+
+
+// Importar rutas
+const edificacionesRoutes = require("./routes/edificaciones");
+app.use("/edificaciones", edificacionesRoutes);
+
+// Ruta principal
+app.get('/edificaciones', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query("SELECT * FROM Lugares");
+        const lugares = result.recordset;
+
+        res.render('edificaciones', { lugares }); // Pasa los lugares a la vista
+    } catch (err) {
+        console.error("Error al obtener los lugares:", err);
+        res.status(500).send("Error al cargar la página de edificaciones.");
+    }
+});
+
+const eventoRoutes = require("./routes/evento");
+
+// filepath: c:\Users\arlin\Downloads\EasyTicket Header\EasyTicket administrador\EasyTicket v2\server.js
+app.use(async (req, res, next) => {
+    try {
+        const pool = await poolPromise; // Obtén la conexión al pool
+        await pool.request()
+            .input('ruta', sql.VarChar, req.originalUrl)
+            .input('usuario', sql.VarChar, req.session.user ? req.session.user.email : 'Anónimo')
+            .input('fecha', sql.DateTime, new Date())
+            .query('INSERT INTO RegistroEventos (ruta, usuario, fecha) VALUES (@ruta, @usuario, @fecha)');
+    } catch (err) {
+        console.error('Error al registrar evento:', err);
+    }
+    next();
+});
+
+// Configuración correcta de las rutas
+app.use("/evento", eventoRoutes);
+
+const comentariosRoutes = require('./routes/comentarios');
+app.use('/comentarios', comentariosRoutes);
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(carrito);
 })

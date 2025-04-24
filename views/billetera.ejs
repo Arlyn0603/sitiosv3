@@ -25,24 +25,38 @@
                 <a href="#">Festivales</a>
             </nav>
             <% if (user) { %>
-                <!-- Botón de perfil (visible cuando el usuario está autenticado) -->
-                <div class="profile-dropdown">
-                    <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
-                        <img src="/img/user.png" alt="Perfil">
-                        <span id="profileEmail"><%= user.email %></span> <!-- Mostrar el correo aquí -->
-                    </button>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="/historial">Historial</a> <!-- Cambiado de "Perfil" a "Historial" -->
-                        <a href="/billetera">Billetera</a>
-                        <a href="/atencion/tickets/vista">Mis Tickets</a>
-                        <a href="/logout">Cerrar sesión</a>
+                <% if (user.tipo === 'Admin') { %>
+                    <!-- Header para Admin -->
+                    <div class="profile-dropdown">
+                        <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                            <a href="/administrador">
+                                <img src="/img/user.png" alt="Administrador">
+                            </a>                            <span id="profileEmail"><%= user.firstName %></span>
+                        </button>
                     </div>
-                </div>
+                <% } else { %>
+                    <!-- Header para Cliente -->
+                    <button class="search-btn" onclick="toggleSearchSection()">
+                        <img src="/img/lupa.png" alt="Buscar" width="20">
+                    </button>
+                    <div class="profile-dropdown">
+                        <button id="profileButton" class="profile-btn" onclick="toggleProfileMenu()">
+                            <a href="/usuario">
+                                <img src="/img/user.png" alt="Usuario">
+                            </a><span id="profileEmail"><%= user.firstName %></span>
+                        </button>
+                    </div>
+                <% } %>
             <% } else { %>
-                <!-- Botón de iniciar sesión (visible cuando el usuario no está autenticado) -->
+                <!-- Header para usuarios no autenticados -->
+                <button class="search-btn" onclick="toggleSearchSection()">
+                    <img src="/img/lupa.png" alt="Buscar" width="20">
+                </button>
                 <button id="loginButton" onclick="openModal()">Iniciar sesión</button>
             <% } %>
+            
         </header>
+
 
         <script>
             // Función para alternar el menú de perfil
@@ -78,6 +92,7 @@
                     <div class="payment-method-item">
                         <p><%= tarjeta.TipoTarjeta %> ···· <%= tarjeta.UltimosCuatroDigitos %></p>
                         <p>Titular: <%= tarjeta.NombreTitular %></p>
+                        <p>Saldo: ₡<%= tarjeta.Saldo.toFixed(2) %></p> <!-- Muestra el saldo de la tarjeta -->
                         <button class="delete-btn" onclick="eliminarTarjeta('<%= tarjeta.NumeroTarjeta %>')">Eliminar</button>
                     </div>
                 <% }); %>
@@ -95,7 +110,7 @@
                 <input type="text" id="numeroTarjeta" name="numeroTarjeta" maxlength="16" required>
                     
                 <label for="nombreTitular">Nombre del Titular:</label>
-                <input type="text" id="nombreTitular" name="nombreTitular" required>
+                <input type="text" id="nombreTitular" name="nombreTitular" value="<%= user.firstName %> <%= user.lastName %>" readonly> <!-- Bloqueado y precargado -->
                     
                 <label for="fechaExpiracion">Fecha de Expiración (MM/YY):</label>
                 <input type="text" id="fechaExpiracion" name="fechaExpiracion" placeholder="MM/YY" required>
@@ -105,8 +120,9 @@
                     
                 <label for="tipoTarjeta">Tipo de Tarjeta:</label>
                 <select id="tipoTarjeta" name="tipoTarjeta" required>
-                    <option value="Crédito">Crédito</option>
-                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Visa</option>
+                    <option value="Débito">MasterCard</option>
+                    <option value="Débito">American Express</option>
                 </select>
                 <label for="saldo">Saldo:</label>
                 <input type="number" id="saldo" name="saldo" step="0.01" required>
